@@ -29,7 +29,7 @@ if (isset($_POST['isCollage']) && $_POST['isCollage'] === 'true') {
         $collageSrcImagePaths[] = $collageBasename . '-' . $i . '.jpg';
     }
 
-    if (!createCollage($collageSrcImagePaths, $filename_tmp, $config['take_frame'], $config['take_frame_path'])) {
+    if (!createCollage($collageSrcImagePaths, $filename_tmp, $config['take_frame'], $config['collage_Frame_2x2'], $config['collage_layout'], $config['collage_background'])) {
         die(json_encode([
             'error' => 'Could not create collage'
         ]));
@@ -94,6 +94,11 @@ if ($config['chroma_keying']) {
     $chromaCopyResource = resizeImage($imageResource, 1500, 1000);
     imagejpeg($chromaCopyResource, $filename_keying, $config['jpeg_quality_chroma']);
     imagedestroy($chromaCopyResource);
+    // AZ insert chroma keying effect apply here 
+    
+    // echo "<script type="text/javascript" src="resources/js/chromakeying.js">setBackgroundImage(<InsertBackground>)</script>"
+    //'<img src="'$filename_keying'" class="backgroundPreview" onclick="setBackgroundImage(<InsertBackground>)">';
+    
 }
 
 // image scale, create thumbnail

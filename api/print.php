@@ -132,6 +132,8 @@ $printimage = shell_exec(
     )
 );
 
+// writeToDB($filename); // AZ Database
+
 die(json_encode([
     'status' => 'ok',
     'msg' => $printimage || '',
@@ -194,3 +196,18 @@ function ResizeCropImage($max_width, $max_height, $source_file, $dst_dir, $quali
         imagedestroy($src_img);
     }
 }
+/*
+function writeToDB($filename){ // AZ Database
+   # POST TO DB
+   $postRequest = array(
+       'api_key' => 'PostPhotoData',
+       'sensor' => 'print',
+       'printName' => $filename
+   );
+   $cURLConnection = curl_init('http://photokaestchen/api/post-esp-data.php'); // AZ To be changed
+   curl_setopt($cURLConnection, CURLOPT_POSTFIELDS, $postRequest);
+   curl_setopt($cURLConnection, CURLOPT_RETURNTRANSFER, true);
+   $apiResponse = curl_exec($cURLConnection);
+   curl_close($cURLConnection);
+} */
+

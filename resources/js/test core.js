@@ -17,9 +17,11 @@ const photoBooth = (function () {
             }
         },
         videoView = $('#video--view').get(0),
+        videoPreview = $('#video--preview').get(0),
         videoSensor = document.querySelector('#video--sensor');
 
     let timeOut,
+        takingPic = false,
         nextCollageNumber = 0,
         currentCollageFile = '',
         imgFilter = config.default_imagefilter;
@@ -99,7 +101,39 @@ const photoBooth = (function () {
         $('#mySidenav').toggleClass('sidenav--open');
     }
 
-    public.startVideo = function () {
+    public.startRemotePreview = function () {
+        $.ajax({
+            method: 'POST',
+            url: 'api/videoPreview.php',
+            data: {},
+            success: () => {},
+            error: (jqXHR, textStatus) => {
+                console.log('An error occurred', textStatus);
+            },
+        });
+
+        const ctx = document.getElementById('remoteVideo').getContext('2d');
+
+        public.previewVideoPlayer = window.setInterval(function () {
+            if (config.dev) {
+                console.log('Updating Image')
+            }
+            const img = new Image();
+            img.src = config.remotePreviewURL + '?' + (new Date()).getTime();
+            ctx.drawImage(img, 0, 0, 960, 640, 0, 0, 960, 640);
+        }, 5000);
+    }    
+    
+    public.stopRemotePreview = function () {
+        window.clearInterval(public.previewVideoPlayer);
+    }
+
+    public.startVideo = function (mode) {
+
+        if (config.previewCamBackground) {
+            public.stopVideo('preview');
+        }
+
         if (!navigator.mediaDevices) {
             return;
         }
@@ -112,12 +146,21 @@ const photoBooth = (function () {
 
         if (config.previewCamFlipHorizontal) {
             $('#video--view').addClass('flip-horizontal');
+            $('#video--preview').addClass('flip-horizontal');
         }
 
         getMedia.call(navigator.mediaDevices, webcamConstraints)
             .then(function (stream) {
-                $('#video--view').show();
-                videoView.srcObject = stream;
+                if (mode === 'preview') {
+                    $('#video--preview').show();
+                    videoPreview.srcObject = stream;
+                    public.stream = stream;
+                    wrapper.css('background-image', 'none');
+                    wrapper.css('background-color', 'transparent');
+                } else {
+                    $('#video--view').show();
+                    videoView.srcObject = stream;
+                }
                 public.stream = stream;
             })
             .catch(function (error) {
@@ -125,11 +168,15 @@ const photoBooth = (function () {
             });
     }
 
-    public.stopVideo = function () {
+    public.stopVideo = function (mode) {
         if (public.stream) {
             const track = public.stream.getTracks()[0];
             track.stop();
-            $('#video--view').hide();
+            if (mode === 'preview') {
+                $('#video--preview').hide();
+            } else {
+                $('#video--view').hide();
+            }
         }
     }
 
@@ -137,18 +184,27 @@ const photoBooth = (function () {
         public.closeNav();
         public.reset();
 
+        takingPic = true;
+        if (config.dev) {
+            console.log('Taking photo:', takingPic);
+        }
+
+        if (config.previewCamBackground) {
+            wrapper.css('background-color', config.colors.panel);
+        }
+
         if (currentCollageFile && nextCollageNumber) {
             photoStyle = 'collage';
         }
 
+        if (config.use_remotePreview) {
+            public.startRemotePreview();
+        }
+
         if (config.previewFromCam) {
-            public.startVideo();
+            public.startVideo('view');
         }
-        if (config.dev) {
-            console.log('start countdown');
-        }
-        photoBooth.LEDcontroll("flashing");
-        
+
         if (config.previewFromIPCam) {
             $('#ipcam--view').show();
             $('#ipcam--view').addClass('streaming');
@@ -159,7 +215,7 @@ const photoBooth = (function () {
             public.cheese(photoStyle);
         });
     }
-
+    
     // Cheese
     public.cheese = function (photoStyle) {
         if (config.dev) {
@@ -199,40 +255,53 @@ const photoBooth = (function () {
         if (config.dev) {
             console.log('Take Picture:' + photoStyle);
         }
-
+        
         if (config.previewFromCam) {
             if (config.previewCamTakesPic && !config.dev) {
                 videoSensor.width = videoView.videoWidth;
                 videoSensor.height = videoView.videoHeight;
                 videoSensor.getContext('2d').drawImage(videoView, 0, 0);
             }
-            public.stopVideo();
+            public.stopVideo('view');
         }
-        
+
         if (config.previewFromIPCam) {
             $('#ipcam--view').removeClass('streaming');
             $('#ipcam--view').hide();
         }
-
+        
         const data = {
             filter: imgFilter,
             style: photoStyle,
-            canvasimg: videoSensor.toDataURL('image/jpeg'),
-        };
+            canvasimg: videoSensor.toDataURL('image/jpeg')
+        };	
 
         if (photoStyle === 'collage') {
             data.file = currentCollageFile;
             data.collageNumber = nextCollageNumber;
         }
-
-        jQuery.post('api/takePic.php', data).done(function (result) {
+        
+        if (config.previewFromCam) {
+            if (config.previewCamTakesPic && !config.dev) {
+                videoSensor.width = videoView.videoWidth;
+                videoSensor.height = videoView.videoHeight;
+                videoSensor.getContext('2d').drawImage(videoView, 0, 0);
+            }
+            public.stopVideoAndTakePic(data);
+        }else {
+          public.callTakePicApi(data);
+        }
+     }
+    
+    public.callTakePicApi =function (data) {
+    	console.log(data);
+      jQuery.post('api/takePic.php', data).done(function (result) {
             console.log('took picture', result);
             $('.cheese').empty();
             if (config.previewCamFlipHorizontal) {
                 $('#video--view').removeClass('flip-horizontal');
             }
-            photoBooth.LEDcontroll("loading");
-            
+
             // reset filter (selection) after picture was taken
             imgFilter = config.default_imagefilter;
             $('#mySidenav .activeSidenavBtn').removeClass('activeSidenavBtn');
@@ -264,14 +333,14 @@ const photoBooth = (function () {
                 currentCollageFile = '';
                 nextCollageNumber = 0;
 
-                public.processPic(photoStyle, result);
+                public.processPic(data.photoStyle, result);
             }
 
         }).fail(function (xhr, status, result) {
             public.errorPic(result);
         });
-    }
-
+    }    
+    
     // Show error Msg and reset
     public.errorPic = function (data) {
         setTimeout(function () {
@@ -507,7 +576,7 @@ const photoBooth = (function () {
         }, 1000);
     }
 
-public.AutoPrint = function (imageSrc) {
+    public.AutoPrint = function (imageSrc) {
 
         setTimeout(function () {
             $.ajax({

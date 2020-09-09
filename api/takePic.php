@@ -91,7 +91,11 @@ if ($_POST['style'] === 'photo') {
     $filename = $basename . '-' . $number . '.jpg';
 
     takePicture($filename);
-
+   /* 
+    if ($number == 3) { // AZ Database
+       writeToDB($file);
+    }*/
+    
     die(json_encode([
         'success' => 'collage',
         'file' => $file,
@@ -103,9 +107,27 @@ if ($_POST['style'] === 'photo') {
         'error' => 'Invalid photo style provided',
     ]));
 }
-
+ //writeToDB($file);
+ 
 // send imagename to frontend
 echo json_encode([
     'success' => 'image',
     'file' => $file,
 ]);
+
+/*
+function writeToDB($file) // AZ Database
+{
+   # POST TO DB
+   $postRequest = array(
+       'api_key' => 'PostPhotoData',
+       'sensor' => 'photo',
+       'photoName' => $file
+   );
+   $cURLConnection = curl_init('http://photokaestchen/api/post-esp-data.php');
+   curl_setopt($cURLConnection, CURLOPT_POSTFIELDS, $postRequest);
+   curl_setopt($cURLConnection, CURLOPT_RETURNTRANSFER, true);
+   $apiResponse = curl_exec($cURLConnection);
+   curl_close($cURLConnection);
+}*/
+

@@ -7,6 +7,7 @@ $config = array();
 $config['dev'] = false;
 $config['show_error_messages'] = true;
 $config['use_print'] = false;
+$config['PrintAuto'] = false;
 $config['use_qr'] = true;
 $config['use_download'] = true;
 $config['print_qrcode'] = true;
@@ -20,6 +21,8 @@ $config['show_fork'] = true;
 $config['previewFromCam'] = false; // experimental see https://github.com/andreknieriem/photobooth/pull/30
 $config['previewCamTakesPic'] = false; // HTTPS required to use tablet- or mobile phone camera
 $config['previewCamFlipHorizontal'] = true;
+$config['previewFromIPCam'] = false;
+$config['ipCamURL'] = null;
 $config['videoWidth'] = '1280';
 $config['videoHeight'] = '720';
 $config['camera_mode'] = 'user'; // possible values are "user" or "environment"
@@ -39,6 +42,9 @@ $config['take_frame'] = false;
 $config['take_frame_path'] = '../resources/img/frames/frame.png';
 $config['chroma_keying'] = true;
 $config['use_collage'] = false;
+$config['collage_layout'] = '2x2'; // AZ: Added Collage Layout 2x2 or 2x4
+$config['collage_background'] = '../resources/img/frames/DefaultCollageBackground.png';
+$config['collage_Frame_2x2'] = '../resources/img/frames/Frame collage2x2.png';
 $config['continuous_collage'] = false;
 $config['background_image'] = null;
 $config['background_admin'] = null;
@@ -53,12 +59,12 @@ $config['photo_key'] = null;
 $config['collage_key'] = null;
 
 // LANGUAGE
-// possible values: de, en, es, fr, gr, hu
+// possible values: de, en, es, fr, gr
 $config['language'] = 'en';
 
 // StartScreen
 $config['start_screen_title'] = 'Photobooth';
-$config['start_screen_subtitle'] = 'Webinterface by André Rinas';
+$config['start_screen_subtitle'] = 'die Fotomacherei';
 
 // FOLDERS
 // change the folders to whatever you like
@@ -147,4 +153,4 @@ $config['jpeg_quality_image'] = 80;
 // RESET
 $config['reset_remove_images'] = true;
 $config['reset_remove_mailtxt'] = true;
-$config['reset_remove_config'] = true;
+$config['reset_remove_config'] = false;

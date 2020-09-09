@@ -12,8 +12,7 @@ $configsetup = [
 				'en' => 'EN',
 				'es' => 'ES',
 				'fr' => 'FR',
-				'gr' => 'GR',
-				'hu' => 'HU'
+				'gr' => 'GR'
 			],
 			'value' => $config['language']
 		],
@@ -53,6 +52,11 @@ $configsetup = [
 			'type' => 'checkbox',
 			'name' => 'use_print',
 			'value' => $config['use_print']
+		],
+		'PrintAuto' => [
+			'type' => 'checkbox',
+			'name' => 'PrintAuto',
+			'value' => $config['PrintAuto']
 		],
 		'use_qr' => [
 			'type' => 'checkbox',
@@ -159,6 +163,24 @@ $configsetup = [
 			'name' => 'use_collage',
 			'value' => $config['use_collage']
 		],
+		'collage_layout' => [
+				'type' => 'input',
+				'name' => 'collage_layout',
+				'placeholder' => $defaultConfig['collage_layout'],
+				'value' => $config['collage_layout']
+		],
+		'collage_background' => [
+			'type' => 'input',
+			'name' => 'collage_background',
+			'placeholder' => $defaultConfig['collage_background'],
+			'value' => $config['collage_background']
+		],
+		'collage_Frame_2x2' => [
+			'type' => 'input',
+			'name' => 'collage_Frame_2x2',
+			'placeholder' => $defaultConfig['collage_Frame_2x2'],
+			'value' => $config['collage_Frame_2x2']
+		],
 		'collage_cntdwn_time' => [
 			'type' => 'input',
 			'name' => 'collage_cntdwn_time',
@@ -185,6 +207,17 @@ $configsetup = [
 			'name' => 'previewCamFlipHorizontal',
 			'value' => $config['previewCamFlipHorizontal']
 		],
+		'previewFromIPCam' => [
+			'type' => 'checkbox',
+			'name' => 'previewFromIPCam',
+			'value' => $config['previewFromIPCam']
+		],
+		'ipCamURL' => [
+			'type' => 'input',
+			'name' => 'ipCamURL',
+			'placeholder' => 'localhost:8081',
+			'value' => $config['ipCamURL']
+		],		
 		'videoWidth' => [
 			'type' => 'input',
 			'name' => 'videoWidth',
